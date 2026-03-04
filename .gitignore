@@ -1,0 +1,50 @@
+# Configuration files with credentials (deprecated: use .env instead)
+config.json
+
+# Environment variable files (PRIMARY configuration method)
+.env
+.env.local
+.env.*.local
+
+# HAR files contain sensitive API data (tokens, session IDs, auth codes)
+har/
+*.har
+
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Virtual environments
+pyenv/
+venv/
+env/
+ENV/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# claude code
+.claude
+CLAUDE.md
