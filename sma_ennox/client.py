@@ -184,6 +184,247 @@ class SMASolarClient:
         logger.debug(f"PV Generation: {pv} W, Consumption: {cons} W")
         return result
 
+    def get_co2_savings(self, today_date: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Get CO2 savings data.
+
+        Args:
+            today_date: Date in YYYY-MM-DD format (default: current date)
+
+        Returns:
+            Dictionary containing:
+                - today (int): CO2 saved today in kg
+                - total (int): Total CO2 saved in kg
+
+        Raises:
+            SMAAuthenticationError: If authentication fails
+            SMAAPIError: If API request fails
+            SMANetworkError: If network request fails
+
+        Example:
+            >>> co2 = client.get_co2_savings()
+            >>> print(f"CO2 saved today: {co2['today']} kg")
+        """
+        from datetime import date
+
+        logger.debug(f"Fetching CO2 savings for component {self.config.component_id}")
+
+        if today_date is None:
+            today_date = date.today().strftime("%Y-%m-%d")
+
+        params = {
+            'componentId': self.config.component_id,
+            'todayDate': today_date
+        }
+        result = self._make_request('GET', endpoints.CO2_URL, params=params)
+        logger.info("CO2 savings retrieved successfully")
+        return result
+
+    def get_revenue(self, today_date: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Get revenue/earnings data.
+
+        Args:
+            today_date: Date in YYYY-MM-DD format (default: current date)
+
+        Returns:
+            Dictionary containing:
+                - today (list): List of dicts with currencyCode3 and value
+                - total (list): List of dicts with currencyCode3 and value
+
+        Raises:
+            SMAAuthenticationError: If authentication fails
+            SMAAPIError: If API request fails
+            SMANetworkError: If network request fails
+
+        Example:
+            >>> revenue = client.get_revenue()
+            >>> total = revenue['total'][0]
+            >>> print(f"Total: {total['value']:.2f} {total['currencyCode3']}")
+        """
+        from datetime import date
+
+        logger.debug(f"Fetching revenue for component {self.config.component_id}")
+
+        if today_date is None:
+            today_date = date.today().strftime("%Y-%m-%d")
+
+        params = {
+            'componentId': self.config.component_id,
+            'todayDate': today_date
+        }
+        result = self._make_request('GET', endpoints.REVENUE_URL, params=params)
+        logger.info("Revenue retrieved successfully")
+        return result
+
+    def get_device_states(self) -> list:
+        """
+        Get device states for all devices in the plant.
+
+        Returns:
+            List of dictionaries, each containing:
+                - componentType (str): Type of component (e.g., "Device")
+                - componentId (str): Device ID
+                - name (str): Device name/serial number
+                - state (int): Device state code
+                - additionalStateTag (str|None): Additional state info
+                - stateFunctionTag (str|None): Function state info
+
+        Raises:
+            SMAAuthenticationError: If authentication fails
+            SMAAPIError: If API request fails
+            SMANetworkError: If network request fails
+
+        Example:
+            >>> devices = client.get_device_states()
+            >>> for device in devices:
+            ...     print(f"{device['name']}: state {device['state']}")
+        """
+        logger.debug(f"Fetching device states for component {self.config.component_id}")
+        params = {'componentId': self.config.component_id}
+        result = self._make_request('GET', endpoints.STATES_URL, params=params)
+        logger.info(f"Device states retrieved successfully ({len(result)} devices)")
+        return result
+
+    def get_plant_info(self, plant_id: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Get detailed plant information.
+
+        Args:
+            plant_id: Plant ID (default: uses component_id from config)
+
+        Returns:
+            Dictionary containing plant details:
+                - plantId (str): Plant ID
+                - name (str): Plant name
+                - peakPower (int): Peak power in watts
+                - startUpUtc (str): Plant startup date
+                - city (str): City name
+                - street (str): Street address
+                - zipCode (str): ZIP code
+                - longitude (float): Longitude coordinate
+                - latitude (float): Latitude coordinate
+                - timezone (str): Timezone identifier
+                - countryName (str): Country name
+                - currencyCode3 (str): Currency code (e.g., "EUR")
+                - hasSelfConsumption (bool): Self-consumption enabled
+                - hasTimezoneInfo (bool): Timezone info available
+                - co2Factor (float): CO2 factor
+                - co2Unit (str): CO2 unit (e.g., "kg")
+                - currency (str): Currency symbol
+
+        Raises:
+            SMAAuthenticationError: If authentication fails
+            SMAAPIError: If API request fails
+            SMANetworkError: If network request fails
+
+        Example:
+            >>> plant = client.get_plant_info()
+            >>> print(f"{plant['name']}: {plant['peakPower']/1000:.1f} kWp")
+        """
+        if plant_id is None:
+            plant_id = self.config.component_id
+
+        logger.debug(f"Fetching plant info for plant {plant_id}")
+        url = endpoints.PLANT_URL.format(plant_id=plant_id)
+        result = self._make_request('GET', url)
+        logger.info("Plant info retrieved successfully")
+        return result
+
+    def get_weather_forecast(
+        self,
+        component_id: Optional[str] = None,
+        start_date_utc: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Get weather forecast for plant location.
+
+        Args:
+            component_id: Component ID (default: uses component_id from config)
+            start_date_utc: Start date in ISO format (default: today at midnight UTC)
+
+        Returns:
+            Dictionary containing:
+                - now (dict): Current weather with time, iconId, temperature
+                - tomorrow (dict): Tomorrow's forecast with date, iconId, min/max temp
+                - city (str): City name
+
+        Raises:
+            SMAAuthenticationError: If authentication fails
+            SMAAPIError: If API request fails
+            SMANetworkError: If network request fails
+
+        Example:
+            >>> weather = client.get_weather_forecast()
+            >>> print(f"Current temp: {weather['now']['temperature']}°C")
+        """
+        from datetime import datetime, timezone
+
+        if component_id is None:
+            component_id = self.config.component_id
+
+        logger.debug(f"Fetching weather forecast for component {component_id}")
+        url = endpoints.WEATHER_URL.format(component_id=component_id)
+
+        if start_date_utc is None:
+            # Use today at midnight UTC
+            today = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+            start_date_utc = today.isoformat().replace('+00:00', 'Z')
+
+        params = {'startTodayUtc': start_date_utc}
+        result = self._make_request('GET', url, params=params)
+        logger.info("Weather forecast retrieved successfully")
+        return result
+
+    def get_sensor_data(self, sensor_type: str) -> Dict[str, Any]:
+        """
+        Get sensor data for specified sensor type.
+
+        Args:
+            sensor_type: Sensor type identifier. Valid values:
+                - "PlantInsolationSensor" - Solar irradiation (W/m²)
+                - "PlantWindVelocitySensor" - Wind speed (m/s)
+                - "PlantModuleTemperatureSensor" - Module temperature (°C)
+                - "PlantAmbientTemperatureSensor" - Ambient temperature (°C)
+
+        Returns:
+            Dictionary containing:
+                - timestampUtc (str): Timestamp in ISO format
+                - value (float): Sensor value (units depend on sensor type)
+                - channelId (str): Channel identifier
+
+        Raises:
+            SMAAuthenticationError: If authentication fails
+            SMAAPIError: If API request fails
+            SMANetworkError: If network request fails
+            ValueError: If sensor_type is invalid
+
+        Example:
+            >>> irradiation = client.get_sensor_data("PlantInsolationSensor")
+            >>> print(f"Solar irradiation: {irradiation['value']} W/m²")
+        """
+        valid_sensors = [
+            "PlantInsolationSensor",
+            "PlantWindVelocitySensor",
+            "PlantModuleTemperatureSensor",
+            "PlantAmbientTemperatureSensor"
+        ]
+
+        if sensor_type not in valid_sensors:
+            raise ValueError(
+                f"Invalid sensor_type '{sensor_type}'. "
+                f"Valid values: {', '.join(valid_sensors)}"
+            )
+
+        logger.debug(f"Fetching sensor data for {sensor_type}")
+        params = {
+            'componentId': self.config.component_id,
+            'widgetType': sensor_type
+        }
+        result = self._make_request('GET', endpoints.SENSOR_URL, params=params)
+        logger.info(f"Sensor data retrieved successfully for {sensor_type}")
+        return result
+
     def is_authenticated(self) -> bool:
         """
         Check if client is currently authenticated with valid token.
