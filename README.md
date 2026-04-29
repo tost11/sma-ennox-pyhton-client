@@ -85,6 +85,7 @@ energy = client.get_energy_balance()
 The library provides methods to access all SMA Sunny Portal endpoints:
 
 - **`get_energy_balance()`** - Get current energy flow (PV generation, consumption, battery status)
+- **`get_battery()`** - Get dedicated battery data (SoC and power)
 - **`get_co2_savings(today_date)`** - Get CO2 savings in kg (today and total)
 - **`get_revenue(today_date)`** - Get revenue/earnings by currency
 - **`get_device_states()`** - Get status of all devices in the plant

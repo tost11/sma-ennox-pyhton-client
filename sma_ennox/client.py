@@ -184,6 +184,35 @@ class SMASolarClient:
         logger.debug(f"PV Generation: {pv} W, Consumption: {cons} W")
         return result
 
+    def get_battery(self) -> Dict[str, Any]:
+        """
+        Get current battery data.
+
+        Returns:
+            Dictionary containing:
+                - batteryStateOfCharge (float): Battery SoC percentage (0-1)
+                - batteryPower (float): Battery power in watts
+                                        (negative = discharging, positive = charging)
+                - timestamp (str): Timestamp in ISO format
+
+        Raises:
+            SMAAuthenticationError: If authentication fails
+            SMAAPIError: If API request fails
+            SMANetworkError: If network request fails
+
+        Example:
+            >>> battery = client.get_battery()
+            >>> print(f"Battery: {battery['batteryStateOfCharge']*100:.1f}%, {battery['batteryPower']:.1f} W")
+        """
+        logger.debug(f"Fetching battery data for component {self.config.component_id}")
+        params = {'componentId': self.config.component_id}
+        result = self._make_request('GET', endpoints.BATTERY_URL, params=params)
+        logger.info("Battery data retrieved successfully")
+        soc = result.get('batteryStateOfCharge')
+        power = result.get('batteryPower')
+        logger.debug(f"Battery SoC: {soc*100:.1f}%, Power: {power:.1f} W")
+        return result
+
     def get_co2_savings(self, today_date: Optional[str] = None) -> Dict[str, Any]:
         """
         Get CO2 savings data.

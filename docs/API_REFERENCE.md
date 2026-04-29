@@ -5,6 +5,7 @@ Complete reference for all SMA Ennox library methods.
 ## Table of Contents
 
 - [Energy Balance](#energy-balance)
+- [Battery](#battery)
 - [CO2 Savings](#co2-savings)
 - [Revenue](#revenue)
 - [Device States](#device-states)
@@ -35,6 +36,30 @@ energy = client.get_energy_balance()
     "batteryDischarging": None              # Battery discharging power (W or None)
 }
 ```
+
+## Battery
+
+Get dedicated battery data including state of charge and power.
+
+```python
+battery = client.get_battery()
+
+# Returns:
+{
+    "batteryStateOfCharge": 0.43,           # Battery SoC (0-1, 43%)
+    "batteryPower": -4981.717,              # Battery power in watts
+                                            # Negative = discharging
+                                            # Positive = charging
+    "timestamp": "2026-04-29T20:45:00Z"     # Timestamp (ISO format)
+}
+```
+
+**Note:** This endpoint provides a simpler battery interface compared to `get_energy_balance()`:
+- Returns single `batteryPower` field (negative = discharging, positive = charging)
+- SoC is returned as decimal 0-1 instead of percentage
+- Dedicated endpoint specifically for battery data
+
+Use `get_battery()` when you only need battery information, or use `get_energy_balance()` for comprehensive energy flow including battery status.
 
 ## CO2 Savings
 

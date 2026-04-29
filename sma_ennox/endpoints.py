@@ -8,6 +8,7 @@ OAUTH_TOKEN_URL = f"{AUTH_BASE_URL}/protocol/openid-connect/token"
 # API endpoints
 API_BASE_URL = "https://uiapi.sunnyportal.com/api/v1"
 ENERGY_BALANCE_URL = f"{API_BASE_URL}/widgets/energybalance"
+BATTERY_URL = f"{API_BASE_URL}/widgets/battery"
 CO2_URL = f"{API_BASE_URL}/widgets/co2"
 REVENUE_URL = f"{API_BASE_URL}/widgets/revenue"
 STATES_URL = f"{API_BASE_URL}/widgets/states"
