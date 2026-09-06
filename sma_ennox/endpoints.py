@@ -15,6 +15,7 @@ STATES_URL = f"{API_BASE_URL}/widgets/states"
 PLANT_URL = f"{API_BASE_URL}/plants/{{plant_id}}"
 WEATHER_URL = f"{API_BASE_URL}/components/{{component_id}}/forecast/weather"
 SENSOR_URL = f"{API_BASE_URL}/widgets/sensor"
+GAUGE_POWER_URL = f"{API_BASE_URL}/widgets/gauge/power"
 
 # OAuth2 constants
 CLIENT_ID = "SPpbeOS"

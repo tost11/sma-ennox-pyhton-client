@@ -454,6 +454,41 @@ class SMASolarClient:
         logger.info(f"Sensor data retrieved successfully for {sensor_type}")
         return result
 
+    def get_gauge_power(self, component_id: Optional[str] = None) -> Dict[str, Any]:
+        """
+        Get current power gauge data for a specific device component.
+
+        This endpoint returns real-time power production for individual devices
+        within a plant (e.g., separate PV arrays, BHKW units).
+
+        Args:
+            component_id: Device-specific component ID (default: uses component_id from config)
+
+        Returns:
+            Dictionary containing:
+                - value (float): Current power output in watts
+                - timestamp (str): Timestamp in ISO format
+                - min (float): Minimum gauge value
+                - max (float): Maximum gauge value (typically device peak power)
+
+        Raises:
+            SMAAuthenticationError: If authentication fails
+            SMAAPIError: If API request fails
+            SMANetworkError: If network request fails
+
+        Example:
+            >>> power = client.get_gauge_power("13731618")
+            >>> print(f"Device power: {power['value']} W")
+        """
+        if component_id is None:
+            component_id = self.config.component_id
+
+        logger.debug(f"Fetching gauge power for component {component_id}")
+        params = {'componentId': component_id}
+        result = self._make_request('GET', endpoints.GAUGE_POWER_URL, params=params)
+        logger.info(f"Gauge power retrieved successfully: {result.get('value')} W")
+        return result
+
     def is_authenticated(self) -> bool:
         """
         Check if client is currently authenticated with valid token.

@@ -12,6 +12,7 @@ Complete reference for all SMA Ennox library methods.
 - [Plant Information](#plant-information)
 - [Weather Forecast](#weather-forecast)
 - [Sensor Data](#sensor-data)
+- [Gauge Power](#gauge-power)
 - [Utility Methods](#utility-methods)
 
 ## Energy Balance
@@ -216,6 +217,34 @@ ambient_temp = client.get_sensor_data("PlantAmbientTemperatureSensor")
 - `PlantWindVelocitySensor` - Wind speed (m/s)
 - `PlantModuleTemperatureSensor` - Solar module temperature (°C)
 - `PlantAmbientTemperatureSensor` - Ambient temperature (°C)
+
+## Gauge Power
+
+Get real-time power gauge data for a specific device component. This endpoint returns the current power output for individual devices within a plant (e.g., separate PV arrays, BHKW units).
+
+```python
+# Get gauge power for configured component
+power = client.get_gauge_power()
+
+# Or specify a device-specific component ID
+power = client.get_gauge_power(component_id="13731618")
+
+# Returns:
+{
+    "value": 26984,                         # Current power output (W)
+    "timestamp": "2026-09-06T13:51:24Z",    # Timestamp (ISO format)
+    "min": 0,                               # Minimum gauge value
+    "max": 50000                            # Maximum gauge value (device peak power in W)
+}
+```
+
+**Parameters:**
+- `component_id` (optional) - Device-specific component ID. If not provided, uses the component ID from client configuration.
+
+**Use cases:**
+- Fetching power production for individual devices in a multi-device plant
+- Monitoring BHKW (combined heat and power) units separately from PV arrays
+- Getting real-time power readings for specific inverters or device groups
 
 ## Utility Methods
 

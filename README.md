@@ -92,6 +92,7 @@ The library provides methods to access all SMA Sunny Portal endpoints:
 - **`get_plant_info(plant_id)`** - Get plant details (location, peak power, configuration)
 - **`get_weather_forecast(component_id, start_date_utc)`** - Get weather forecast for plant location
 - **`get_sensor_data(sensor_type)`** - Get sensor readings (irradiation, wind, temperatures)
+- **`get_gauge_power(component_id)`** - Get real-time power gauge data for a specific device
 - **`is_authenticated()`** - Check if client has valid authentication token
 - **`refresh_token()`** - Manually refresh the authentication token
 
