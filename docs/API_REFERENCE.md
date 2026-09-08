@@ -229,6 +229,9 @@ power = client.get_gauge_power()
 # Or specify a device-specific component ID
 power = client.get_gauge_power(component_id="13731618")
 
+# With type filter (e.g., for BHKW)
+power = client.get_gauge_power(component_id="13731618", type="CombinedHeatAndPower")
+
 # Returns:
 {
     "value": 26984,                         # Current power output (W)
@@ -240,6 +243,10 @@ power = client.get_gauge_power(component_id="13731618")
 
 **Parameters:**
 - `component_id` (optional) - Device-specific component ID. If not provided, uses the component ID from client configuration.
+- `type` (optional) - Gauge type filter. Known values:
+  - `"PvProduction"` - Solar PV production
+  - `"CombinedHeatAndPower"` - BHKW (Blockheizkraftwerk) production
+  - If not provided, the parameter is omitted from the request.
 
 **Use cases:**
 - Fetching power production for individual devices in a multi-device plant

@@ -454,7 +454,7 @@ class SMASolarClient:
         logger.info(f"Sensor data retrieved successfully for {sensor_type}")
         return result
 
-    def get_gauge_power(self, component_id: Optional[str] = None) -> Dict[str, Any]:
+    def get_gauge_power(self, component_id: Optional[str] = None, type: Optional[str] = None) -> Dict[str, Any]:
         """
         Get current power gauge data for a specific device component.
 
@@ -463,6 +463,8 @@ class SMASolarClient:
 
         Args:
             component_id: Device-specific component ID (default: uses component_id from config)
+            type: Optional gauge type filter (e.g., "PvProduction", "CombinedHeatAndPower").
+                  If not provided, the parameter is omitted from the request.
 
         Returns:
             Dictionary containing:
@@ -479,12 +481,18 @@ class SMASolarClient:
         Example:
             >>> power = client.get_gauge_power("13731618")
             >>> print(f"Device power: {power['value']} W")
+
+            >>> # With type filter for BHKW
+            >>> power = client.get_gauge_power("13731618", type="CombinedHeatAndPower")
         """
         if component_id is None:
             component_id = self.config.component_id
 
-        logger.debug(f"Fetching gauge power for component {component_id}")
+        logger.debug(f"Fetching gauge power for component {component_id}" +
+                     (f" (type={type})" if type else ""))
         params = {'componentId': component_id}
+        if type is not None:
+            params['type'] = type
         result = self._make_request('GET', endpoints.GAUGE_POWER_URL, params=params)
         logger.info(f"Gauge power retrieved successfully: {result.get('value')} W")
         return result
